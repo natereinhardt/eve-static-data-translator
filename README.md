@@ -1,8 +1,8 @@
-# Eve Statis Data Translator
+# Eve Static Data Translator
 
-Translates basic static eve api data to json and places it in a mongo database.
+Translates basic static Eve Api data to JSON and places it in a mongo database.
 
-Intended use it to maintain old and new items for the EOS app
+Intended use it to maintain old and new items for the EOS app (https://github.com/natereinhardt/eve-operations-suite)
 
 ###Tech Stack###
 - Express
