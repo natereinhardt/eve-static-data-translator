@@ -2,9 +2,7 @@
 
 var async = require("async");
 var RequestPromise = require("request-promise");
-//var request = Promise.promisifyAll(require("request"), {multiArgs: true});
-
-//var eveMarketCrestEndpoint = 'https://crest-tq.eveonline.com/market/10000002/orders/sell/?type=https://crest-tq.eveonline.com/inventory/types/';
+var Promise = require("bluebird");
 
 var eveItemCrestEndpoint = 'https://crest-tq.eveonline.com/inventory/types/';
 
@@ -70,29 +68,24 @@ var itemIds = [
 ];
 
 exports.getItemData =function getItemData(req, res) {
-    var items = [];
     var errors = [];
-
+    var allPromises = [];
     for(var itemId in itemIds) {
-
         var options = {
             uri: eveItemCrestEndpoint + itemIds[itemId] +'/',
             json: true
         };
-
-        RequestPromise(options).then(function (item){
-            //console.log(item);
-            items.push(item);
-
-        }).catch(function(err){
-            console.log(err);
-            errors.push(err);
-            //console.log(err)
-        });
+        allPromises.push(RequestPromise(options));
     }
-    console.log(items);
-    console.log(errors);
-    res.type('application/json');
-    res.json(items);
+    Promise.all(allPromises).then(function (items){
+        for(var item in items){
+            console.log(items[item].id)
+        }
+        console.log(items.id);
+        res.json(items);
+    }).catch(function(err){
+        console.log(err);
+        errors.push(err);
+    });
 };
 
