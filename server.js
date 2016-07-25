@@ -23,7 +23,7 @@ fs.readdirSync(models_path).forEach(function (file) {
     }
 });
 
-//Grab all models related to building the univers
+//Grab all models related to building the universe
 fs.readdirSync(universe_path).forEach(function (file) {
     if (~file.indexOf('.js')) {
         require(universe_path + '/' + file)
@@ -42,12 +42,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.use('/node_modules', express.static(__dirname +'/node_modules'));
 
 
-require('./src/routes/eveCrestRoutes')(app);
+require('./src/routes/itemRoutes')(app);
 
 
 app.listen(port);
