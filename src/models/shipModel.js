@@ -3,8 +3,9 @@ var Schema = mongoose.Schema;
 
 //Schema Definition
 var shipSchema = new Schema({
-    eveId: Number,
+    _id: Number,
     name: String,
+    description: String,
     shipType: Number,
     imgUrlLrg: String,
     imgUrlSml: String,
