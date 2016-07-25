@@ -1,6 +1,8 @@
 {
   "name": "eve-static-data-translator",
   "version": "0.0.1",
+  "description": "",
+  "license": "MIT",
   "dependencies": {
     "async": "^1.5.2",
     "bluebird": "^3.4.1",
@@ -10,6 +12,11 @@
     "method-override": "~2.0.2",
     "mongoose": "^4.1.2",
     "request": "^2.74.0",
-    "request-promise": "^4.0.2"
+    "request-promise": "^4.0.2",
+    "gulp": "^3.8.11",
+    "gulp-nodemon": "^1.0.5"
+  },
+  "devDependencies": {
+  "gulp-env": "^0.2.0"
   }
 }
