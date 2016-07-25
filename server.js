@@ -8,6 +8,7 @@ const  methodOverride = require('method-override');
 
 const models_path = join(__dirname, 'src/models');
 const universe_path = join(__dirname, 'src/models/Universe');
+const routes = join(__dirname, 'src/routes');
 
 const port = process.env.PORT || 12345;
 const app = express();
@@ -28,6 +29,12 @@ fs.readdirSync(universe_path).forEach(function (file) {
         require(universe_path + '/' + file)
     }
 });
+//Grab all the routes
+fs.readdirSync(routes).forEach(function (file) {
+    if (~file.indexOf('.js')) {
+        require(routes + '/' + file)(app)
+    }
+});
 
 // get all data/stuff of the body (POST) parameters
 app.use(bodyParser.json());
@@ -40,7 +47,7 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use('/node_modules', express.static(__dirname +'/node_modules'));
 
 
-require('./src/routes/itemsRoutes')(app);
+require('./src/routes/eveCrestRoutes')(app);
 
 
 app.listen(port);
