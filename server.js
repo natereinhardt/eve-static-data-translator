@@ -5,9 +5,6 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const  methodOverride = require('method-override');
 
-
-const models_path = join(__dirname, 'src/models');
-const universe_path = join(__dirname, 'src/models/Universe');
 const routes = join(__dirname, 'src/routes');
 
 const port = process.env.PORT || 12345;
@@ -16,19 +13,6 @@ const app = express();
 mongoose.connect('mongodb://localhost:27017/eos');
 
 
-//Grab all models
-fs.readdirSync(models_path).forEach(function (file) {
-    if (~file.indexOf('.js')) {
-        require(models_path + '/' + file)
-    }
-});
-
-//Grab all models related to building the universe
-fs.readdirSync(universe_path).forEach(function (file) {
-    if (~file.indexOf('.js')) {
-        require(universe_path + '/' + file)
-    }
-});
 //Grab all the routes
 fs.readdirSync(routes).forEach(function (file) {
     if (~file.indexOf('.js')) {
@@ -44,9 +28,6 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.use('/node_modules', express.static(__dirname +'/node_modules'));
-
-
-require('./src/routes/itemRoutes')(app);
 
 
 app.listen(port);

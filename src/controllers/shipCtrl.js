@@ -146,7 +146,7 @@ var haulerShipIds = [
    '20189',    //Fenrir
    '28846'     //Nomad
 ];
-
+//TODO: Reduce Redundancy and Create an Update ALL Function
 exports.updateBargeData = function updateBargeData(req, res) {
     var ships = [];
     var allPromises = [];

@@ -1,7 +1,17 @@
-/**
- * Created by natem on 07/24/2016.
- */
+'use strict';
 
+var async = require("async");
+var RequestPromise = require("request-promise");
+var Promise = require("bluebird");
+
+
+var regionModel = require('./../models/universe/regionModel');
+var constellationModel = require('./../models/universe/constellationModel');
+var systemModel = require('./../models/universe/systemModel');
+
+var eveRegionCrestEndpoint = 'https://crest-tq.eveonline.com/regions';
+var eveConstellationCrestEndpoint = 'https://crest-tq.eveonline.com/regions';
+var eveRegionmCrestEndpoint = 'https://crest-tq.eveonline.com/regions';
 
 
 /*

@@ -144,6 +144,8 @@ var iceIds = [
     '16267'  //   Dark Glitter
 ];
 
+
+//TODO: Reduce Redundancy
 exports.updateOreData = function updateOreData(req, res) {
     var items = [];
     var allPromises = [];
