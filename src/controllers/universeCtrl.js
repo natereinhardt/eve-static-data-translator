@@ -29,15 +29,19 @@ exports.updateUniverseData = getAllRegions;
 
 function getAllRegions(req, res){
    getAllRegionsHrefs().then(function (hrefs){
+       var newRegions = [];
        for(var href in hrefs){
            var options = {
                uri: hrefs[href],
                json: true
            };
-           
            RequestPromise(options).then(function (responseItem){
                var constellationObjects = [];
                for(var item in responseItem.constellations){
+                   getConstellationInfo('https://crest-tq.eveonline.com/constellations/'+responseItem.constellations[item].id+'/')
+                       .then(function(constellationInfo){
+                           console.log(constellationInfo);
+                       });
                    var newConstellation = constellationModel({
                        _id: responseItem.constellations[item].id,
                        href: 'https://crest-tq.eveonline.com/constellations/'+responseItem.constellations[item].id+'/'
@@ -52,11 +56,24 @@ function getAllRegions(req, res){
                    href: 'https://crest-tq.eveonline.com/regions/'+responseItem.id+'/',
                    constellations: constellationObjects
                });
-                newRegion.save();
-                console.log(newRegion);
+               newRegion.save();
+               newRegions.push(newRegion);
+               console.log(newRegion);
            });
        }
    });
+}
+
+function getConstellationInfo(href){
+    var options = {
+        uri: href,
+        json: true
+    };
+    return RequestPromise(options).then(function (constellation){
+        return constellation;
+
+    });
+
 }
 
 
