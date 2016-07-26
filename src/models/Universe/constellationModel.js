@@ -5,6 +5,7 @@ var Schema = mongoose.Schema;
 var constellationSchema = new Schema({
     _id: Number,
     name: String,
+    href: String,
     solarSystems: [{
         type: Schema.ObjectId,
         ref: 'SolarSystem'

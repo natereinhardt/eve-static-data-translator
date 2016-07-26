@@ -5,6 +5,8 @@ var Schema = mongoose.Schema;
 var regionSchema = new Schema({
     _id: Number,
     name: String,
+    description: String,
+    href: String,
     constellations: [{
         type: Schema.ObjectId,
         ref: 'Constellation'
