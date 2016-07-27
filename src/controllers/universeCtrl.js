@@ -3,6 +3,7 @@
 var async = require("async");
 var RequestPromise = require("request-promise");
 var Promise = require("bluebird");
+var _ = require('lodash');
 
 
 var regionModel = require('./../models/universe/regionModel');
@@ -26,56 +27,47 @@ var eveSystemsCrestEndpoint = 'https://crest-tq.eveonline.com/systems/';
 
 exports.updateUniverseData = getAllRegions;
 
+exports.getAllConstellatons = getAllConstellations;
+
 
 function getAllRegions(req, res){
-   getAllRegionsHrefs().then(function (hrefs){
-       var newRegions = [];
-       for(var href in hrefs){
-           var options = {
-               uri: hrefs[href],
-               json: true
-           };
-           RequestPromise(options).then(function (responseItem){
-               var constellationObjects = [];
-               for(var item in responseItem.constellations){
-                   getConstellationInfo('https://crest-tq.eveonline.com/constellations/'+responseItem.constellations[item].id+'/')
-                       .then(function(constellationInfo){
-                           console.log(constellationInfo);
-                       });
-                   var newConstellation = constellationModel({
-                       _id: responseItem.constellations[item].id,
-                       href: 'https://crest-tq.eveonline.com/constellations/'+responseItem.constellations[item].id+'/'
-                   });
-                   newConstellation.save();
-                   constellationObjects.push(newConstellation);
-               }
-               var newRegion = regionModel({
-                   _id: responseItem.id,
-                   name: responseItem.name,
-                   description: responseItem.description,
-                   href: 'https://crest-tq.eveonline.com/regions/'+responseItem.id+'/',
-                   constellations: constellationObjects
-               });
-               newRegion.save();
-               newRegions.push(newRegion);
-               console.log(newRegion);
-           });
-       }
-   });
+    getAllRegionsHrefs().then(function (hrefs){
+        var chunks = _.chunk(hrefs, 20);
+        return Promise.map(chunks, function(chunk) {
+            // tune the delay to what you need it to be
+            // it will wait the delay (in ms) before starting the next chunk of requests
+            return Promise.map(chunk, getRegion).delay(150);
+        });
+    });
 }
 
-function getConstellationInfo(href){
+function getRegion(href) {
     var options = {
         uri: href,
         json: true
     };
-    return RequestPromise(options).then(function (constellation){
-        return constellation;
-
+    return RequestPromise(options).then(function (responseItem){
+        var constellationObjects = [];
+        for(var item in responseItem.constellations){
+            var newConstellation = constellationModel({
+                _id: responseItem.constellations[item].id,
+                href: eveConstellationCrestEndpoint + responseItem.constellations[item].id+'/'
+            });
+            newConstellation.save();
+            constellationObjects.push(newConstellation);
+        }
+        var newRegion = regionModel({
+            _id: responseItem.id,
+            name: responseItem.name,
+            description: responseItem.description,
+            href: eveRegionCrestEndpoint + responseItem.id+'/',
+            constellations: constellationObjects
+        });
+        newRegion.save();
+        console.log(newRegion);
+        return newRegion;
     });
-
 }
-
 
 function getAllRegionsHrefs(){
     var options = {
@@ -90,4 +82,34 @@ function getAllRegionsHrefs(){
         }
         return regionHrefs;
     });
+}
+
+function getAllConstellations(req, res){
+    constellationModel.find({}, function (err, docs){
+        var chunks = _.chunk(docs, 20);
+        return Promise.map(chunks, function(chunk) {
+            // tune the delay to what you need it to be
+            // it will wait the delay (in ms) before starting the next chunk of requests
+            return Promise.map(chunk, getConstellationInfo).delay(200000);
+            });
+        });
+}
+
+function getConstellationInfo(doc){
+    var options = {
+        uri: doc.href,
+        json: true
+    };
+   return  RequestPromise(options).then(function (responseItem){
+       console.log(responseItem);
+       constellationModel.findByIdAndUpdate(doc._id,  { $set: { name: responseItem.name }}, function(err){
+            if(err){
+                console.log("And Error Occured");
+            }else {
+                return "good to go"
+            }
+        });
+    });
+
+
 }
