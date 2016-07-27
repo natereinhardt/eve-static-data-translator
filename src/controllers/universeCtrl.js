@@ -29,23 +29,42 @@ exports.updateUniverseData = getAllRegions;
 
 function getAllRegions(req, res){
     getAllRegionsHrefs().then(function (hrefs){
-        var chunks = _.chunk(hrefs, 20);
+        var chunks = _.chunk(hrefs, 25);
         return Promise.map(chunks, function(chunk) {
-            // tune the delay to what you need it to be
-            // it will wait the delay (in ms) before starting the next chunk of requests
             return Promise.map(chunk, getRegion).then(function (getRegionResults){
-                console.log('----------------~~~~~~~~~~~~~~~~~~-------------------~~~~~~~~~~~~~~');
-                for(var item in getRegionResults){
-                    Promise.map(getRegionResults[item].constellations, getConstellationInfo);
+                for(var item in getRegionResults) {
+                    Promise.map(getRegionResults[item].constellations, getConstellationInfo).then(function (constellationInfo) {
+                        var chunks = _.chunk(constellationInfo, 150);
+                        return Promise.map(chunks, function (chunk) {
+                            return Promise.map(chunk, getSystem).delay(20000);
+                        })
+                    }).delay(20000);
                 }
-            }).delay(200);
+            }).delay(200000);
         });
     });
 }
 
-function getConstellationInfo(whatsComingIN) {
+function getSystem(systems){
+    for(var updateSystem in systems){
+        var options = {
+            uri: systems[updateSystem].href,
+            json: true
+        };
+         RequestPromise(options).then(function (responseItem){
+             //Grab the system in the db and update it with its info
+            systemModel.findOne({ _id: systems[updateSystem]._id }, function (err, doc){
+                doc.name = responseItem.name;
+                doc.save();
+            });
+
+        });
+    }
+}
+
+function getConstellationInfo(constellation) {
     var options = {
-        uri: whatsComingIN.href,
+        uri: constellation.href,
         json: true
     };
     return RequestPromise(options).then(function (responseItem){
@@ -58,11 +77,13 @@ function getConstellationInfo(whatsComingIN) {
             newSystem.save();
             arrayOfSystems.push(newSystem);
         }
-        constellationModel.findOne({ _id: whatsComingIN._id }, function (err, doc){
+        //find the constellation and update it with its info
+        constellationModel.findOne({ _id: constellation._id }, function (err, doc){
             doc.name = responseItem.name;
             doc.solarSystems = arrayOfSystems;
             doc.save();
         });
+        return arrayOfSystems;
     });
 }
 
