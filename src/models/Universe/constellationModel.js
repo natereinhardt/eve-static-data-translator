@@ -6,10 +6,7 @@ var constellationSchema = new Schema({
     _id: Number,
     name: String,
     href: String,
-    solarSystems: [{
-        type: Schema.ObjectId,
-        ref: 'SolarSystem'
-    }]
+    solarSystems: [Number]
 });
 
 //Expose (export) the model

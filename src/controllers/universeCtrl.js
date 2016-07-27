@@ -27,19 +27,45 @@ var eveSystemsCrestEndpoint = 'https://crest-tq.eveonline.com/systems/';
 
 exports.updateUniverseData = getAllRegions;
 
-exports.getAllConstellatons = getAllConstellations;
-
-
 function getAllRegions(req, res){
     getAllRegionsHrefs().then(function (hrefs){
         var chunks = _.chunk(hrefs, 20);
         return Promise.map(chunks, function(chunk) {
             // tune the delay to what you need it to be
             // it will wait the delay (in ms) before starting the next chunk of requests
-            return Promise.map(chunk, getRegion).delay(150);
+            return Promise.map(chunk, getRegion).then(function (getRegionResults){
+                console.log('----------------~~~~~~~~~~~~~~~~~~-------------------~~~~~~~~~~~~~~');
+                for(var item in getRegionResults){
+                    Promise.map(getRegionResults[item].constellations, getConstellationInfo);
+                }
+            }).delay(200);
         });
     });
 }
+
+function getConstellationInfo(whatsComingIN) {
+    var options = {
+        uri: whatsComingIN.href,
+        json: true
+    };
+    return RequestPromise(options).then(function (responseItem){
+        var arrayOfSystems = [];
+        for(var system in responseItem.systems){
+            var newSystem = new systemModel({
+                _id: responseItem.systems[system].id,
+                href: responseItem.systems[system].href
+            });
+            newSystem.save();
+            arrayOfSystems.push(newSystem);
+        }
+        constellationModel.findOne({ _id: whatsComingIN._id }, function (err, doc){
+            doc.name = responseItem.name;
+            doc.solarSystems = arrayOfSystems;
+            doc.save();
+        });
+    });
+}
+
 
 function getRegion(href) {
     var options = {
@@ -64,7 +90,6 @@ function getRegion(href) {
             constellations: constellationObjects
         });
         newRegion.save();
-        console.log(newRegion);
         return newRegion;
     });
 }
@@ -75,7 +100,6 @@ function getAllRegionsHrefs(){
         json: true
     };
    return RequestPromise(options).then(function (responseItems){
-        //console.log(responseItems);
         var regionHrefs = [];
         for(var item in responseItems.items){
                 regionHrefs.push(responseItems.items[item].href);
@@ -84,32 +108,3 @@ function getAllRegionsHrefs(){
     });
 }
 
-function getAllConstellations(req, res){
-    constellationModel.find({}, function (err, docs){
-        var chunks = _.chunk(docs, 20);
-        return Promise.map(chunks, function(chunk) {
-            // tune the delay to what you need it to be
-            // it will wait the delay (in ms) before starting the next chunk of requests
-            return Promise.map(chunk, getConstellationInfo).delay(200000);
-            });
-        });
-}
-
-function getConstellationInfo(doc){
-    var options = {
-        uri: doc.href,
-        json: true
-    };
-   return  RequestPromise(options).then(function (responseItem){
-       console.log(responseItem);
-       constellationModel.findByIdAndUpdate(doc._id,  { $set: { name: responseItem.name }}, function(err){
-            if(err){
-                console.log("And Error Occured");
-            }else {
-                return "good to go"
-            }
-        });
-    });
-
-
-}
