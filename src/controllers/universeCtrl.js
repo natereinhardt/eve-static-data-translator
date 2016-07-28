@@ -27,39 +27,35 @@ var eveSystemsCrestEndpoint = 'https://crest-tq.eveonline.com/systems/';
 
 exports.updateUniverseData = getAllRegions;
 
-function getAllRegions(req, res){
-    getAllRegionsHrefs().then(function (hrefs){
-        var chunks = _.chunk(hrefs, 25);
-        return Promise.map(chunks, function(chunk) {
-            return Promise.map(chunk, getRegion).then(function (getRegionResults){
-                for(var item in getRegionResults) {
-                    Promise.map(getRegionResults[item].constellations, getConstellationInfo).then(function (constellationInfo) {
-                        var chunks = _.chunk(constellationInfo, 150);
-                        return Promise.map(chunks, function (chunk) {
-                            return Promise.map(chunk, getSystem).delay(20000);
-                        })
-                    }).delay(20000);
-                }
-            }).delay(200000);
+function getAllRegions(req, res) {
+    getAllRegionsHrefs().then(function (hrefs) {
+        return Promise.mapSeries(hrefs, function (href) {
+            getRegion(href).then(function (regions) {
+                return Promise.mapSeries(regions.constellations, function (constellation) {
+                    getConstellationInfo(constellation).then(function (constellationInfo) {
+                        return Promise.map(constellationInfo, getSystem).delay(15000);
+                    });
+                });
+            });
         });
     });
 }
 
-function getSystem(systems){
-    for(var updateSystem in systems){
-        var options = {
-            uri: systems[updateSystem].href,
-            json: true
-        };
-         RequestPromise(options).then(function (responseItem){
-             //Grab the system in the db and update it with its info
-            systemModel.findOne({ _id: systems[updateSystem]._id }, function (err, doc){
-                doc.name = responseItem.name;
-                doc.save();
-            });
 
+function getSystem(systems) {
+    console.log('Systems', systems);
+    //for(var updateSystem in systems){
+    var options = {
+        uri: systems.href,
+        json: true
+    };
+    return RequestPromise(options).then(function (responseItem) {
+        //Grab the system in the db and update it with its info
+        systemModel.findOne({_id: systems._id}, function (err, doc) {
+            doc.name = responseItem.name;
+            doc.save();
         });
-    }
+    }).delay(15000);
 }
 
 function getConstellationInfo(constellation) {
@@ -84,7 +80,7 @@ function getConstellationInfo(constellation) {
             doc.save();
         });
         return arrayOfSystems;
-    });
+    }).delay(15000);
 }
 
 
