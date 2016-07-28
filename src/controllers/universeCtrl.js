@@ -1,9 +1,5 @@
-'use strict';
-
 var RequestPromise = require("request-promise");
 var Promise = require("bluebird");
-var _ = require('lodash');
-
 
 var regionModel = require('./../models/universe/regionModel');
 var constellationModel = require('./../models/universe/constellationModel');
@@ -17,22 +13,21 @@ exports.updateUniverseData = getAllRegions;
 function getAllRegions(req, res) {
     getAllRegionsHrefs().then(function (hrefs) {
         return Promise.mapSeries(hrefs, function (href) {
-            getRegion(href).then(function (regions) {
+            return getRegion(href).then(function (regions) {
                 return Promise.mapSeries(regions.constellations, function (constellation) {
-                    getConstellationInfo(constellation).then(function (constellationInfo) {
-                        return Promise.map(constellationInfo, getSystem).delay(15000);
+                    return getConstellationInfo(constellation).then(function (constellationInfo) {
+                        return Promise.map(constellationInfo, getSystem).delay(20);
                     });
-                }).delay(15000);
+                });
             });
-        }).delay(15000);
+        });
     });
 }
 
-function getSystem(systems) {
-    console.log('Systems', systems);
-    //for(var updateSystem in systems){
+function getSystem(system) {
+    console.log('System Again', system);
     var options = {
-        uri: systems.href,
+        uri: system.href,
         json: true
     };
     return RequestPromise(options).then(function (responseItem) {
@@ -45,13 +40,12 @@ function getSystem(systems) {
             //K-Space
             securityType = 1;
         }
-        systemModel.findOne({_id: systems._id}, function (err, doc) {
+        systemModel.findOne({_id: system._id}, function (err, doc) {
             doc.name = responseItem.name;
             doc.securityStatus = responseItem.securityStatus;
             doc.systemType = securityType;
             doc.save();
         });
-
     })
 }
 
@@ -79,7 +73,7 @@ function getConstellationInfo(constellation) {
             doc.save();
         });
         return arrayOfSystems;
-    }).delay(15000);
+    });
 }
 
 function getRegion(href) {
