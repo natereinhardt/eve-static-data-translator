@@ -76,158 +76,85 @@ var haulerShipIds = [
     '28846'     //Nomad
 ];
 
-//TODO: Reduce Redundancy and Create an Update ALL Function
 exports.updateBargeData = function updateBargeData(req, res) {
+    var shipType = 1;
+    getShipData(miningBargeIds, shipType).then(function (retrievedShips){
+        res.json(retrievedShips);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    });
+};
+
+exports.updateExhumerData = function updateExhumerData(req, res) {
+    var shipType = 2;
+    getShipData(exhumerIds, shipType).then(function (retrievedShips){
+        res.json(retrievedShips);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    });
+};
+
+exports.updateFrigateData = function updateFrigateData(req, res) {
+    var shipType = 3;
+    getShipData(miningFrigateIds, shipType).then(function (retrievedShips){
+        res.json(retrievedShips);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    })
+};
+
+exports.updateCommandShipData = function updateCommandShipData(req, res) {
+    var shipType = 4;
+    getShipData(industrialCommandShipIds, shipType).then(function (retrievedShips){
+        res.json(retrievedShips);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    })
+};
+
+exports.updateHaulerData = function updateHaulerData(req, res) {
+    var shipType = 5;
+    getShipData(haulerShipIds, shipType).then(function (retrievedShips){
+        res.json(retrievedShips);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    })
+};
+
+function getShipData(shipIds, shipType){
     var ships = [];
     var allPromises = [];
-    for (var miningBargeId in miningBargeIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + miningBargeIds[miningBargeId] + '/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
+    for (var id in shipIds) {
+        if(shipIds.hasOwnProperty(id)){
+            var options = {
+
+                uri: eveItemCrestEndpoint + shipIds[id] + '/',
+                json: true
+            };
+            allPromises.push(RequestPromise(options));
+        }
     }
-    Promise.all(allPromises).then(function (responseItems) {
+    return Promise.all(allPromises).then(function (responseItems) {
         for (var item in responseItems) {
-            if (responseItems.hasOwnProperty(item)) {
+            if(responseItems.hasOwnProperty(item)){
                 var newShip = new shipModel({
                     _id: responseItems[item].id,
                     name: responseItems[item].name,
                     description: responseItems[item].description,
-                    itemType: 1,
+                    itemType: shipType,
                     imgUrlLrg: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_64.png',
                     imgUrlSml: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_32.png',
                     renderUrl: 'https://imageserver.eveonline.com/Render/' + responseItems[item].id + '_256.png'
                 });
                 newShip.save();
                 ships.push(newShip);
+
             }
         }
-        res.json(ships);
+        return ships;
     }).catch(function (err) {
         console.log(err);
     });
-};
-
-exports.updateExhumerData = function updateExhumerData(req, res) {
-    var ships = [];
-    var allPromises = [];
-    for (var exhumerId in exhumerIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + exhumerIds[exhumerId] + '/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
-    }
-    Promise.all(allPromises).then(function (responseItems) {
-        for (var item in responseItems) {
-            var newShip = new shipModel({
-                _id: responseItems[item].id,
-                name: responseItems[item].name,
-                description: responseItems[item].description,
-                itemType: 2,
-                imgUrlLrg: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_64.png',
-                imgUrlSml: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_32.png',
-                renderUrl: 'https://imageserver.eveonline.com/Render/' + responseItems[item].id + '_256.png'
-            });
-            newShip.save();
-            ships.push(newShip);
-        }
-        res.json(ships);
-    }).catch(function (err) {
-        console.log(err);
-    });
-};
-
-exports.updateFrigateData = function updateFrigateData(req, res) {
-    var ships = [];
-    var allPromises = [];
-    for (var miningFrigateId in miningFrigateIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + miningFrigateIds[miningFrigateId] + '/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
-    }
-    Promise.all(allPromises).then(function (responseItems) {
-        for (var item in responseItems) {
-            var newShip = new shipModel({
-                _id: responseItems[item].id,
-                name: responseItems[item].name,
-                description: responseItems[item].description,
-                itemType: 3,
-                imgUrlLrg: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_64.png',
-                imgUrlSml: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_32.png',
-                renderUrl: 'https://imageserver.eveonline.com/Render/' + responseItems[item].id + '_256.png'
-            });
-            newShip.save();
-            ships.push(newShip);
-        }
-        res.json(ships);
-    }).catch(function (err) {
-        console.log(err);
-    });
-};
-
-exports.updateCommandShipData = function updateCommandShipData(req, res) {
-    var ships = [];
-    var allPromises = [];
-    for (var industrialCommandShipId in industrialCommandShipIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + industrialCommandShipIds[industrialCommandShipId] + '/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
-    }
-    Promise.all(allPromises).then(function (responseItems) {
-        for (var item in responseItems) {
-            var newShip = new shipModel({
-                _id: responseItems[item].id,
-                name: responseItems[item].name,
-                description: responseItems[item].description,
-                itemType: 4,
-                imgUrlLrg: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_64.png',
-                imgUrlSml: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_32.png',
-                renderUrl: 'https://imageserver.eveonline.com/Render/' + responseItems[item].id + '_256.png'
-            });
-            newShip.save();
-            ships.push(newShip);
-        }
-        res.json(ships);
-    }).catch(function (err) {
-        console.log(err);
-    });
-};
-
-
-exports.updateHaulerData = function updateHaulerData(req, res) {
-    var ships = [];
-    var allPromises = [];
-    for (var haulerShipId in haulerShipIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + haulerShipIds[haulerShipId] + '/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
-    }
-    Promise.all(allPromises).then(function (responseItems) {
-        for (var item in responseItems) {
-            var newShip = new shipModel({
-                _id: responseItems[item].id,
-                name: responseItems[item].name,
-                description: responseItems[item].description,
-                itemType: 5,
-                imgUrlLrg: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_64.png',
-                imgUrlSml: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_32.png',
-                renderUrl: 'https://imageserver.eveonline.com/Render/' + responseItems[item].id + '_256.png'
-            });
-            newShip.save();
-            ships.push(newShip);
-        }
-        res.json(ships);
-    }).catch(function (err) {
-        console.log(err);
-    });
-};
+}
 
 
