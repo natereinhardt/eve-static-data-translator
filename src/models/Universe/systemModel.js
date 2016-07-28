@@ -5,7 +5,9 @@ var Schema = mongoose.Schema;
 var solarSystemSchema = new Schema({
     _id: Number,
     name: String,
-    href: String
+    href: String,
+    securityStatus: Number,
+    systemType: Number
 });
 
 //Expose (export) the model
