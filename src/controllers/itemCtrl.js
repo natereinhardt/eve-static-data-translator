@@ -74,65 +74,56 @@ var iceIds = [
     '16267'  //   Dark Glitter
 ];
 
-
-//TODO: Reduce Redundancy
 exports.updateOreData = function updateOreData(req, res) {
-    var items = [];
-    var allPromises = [];
-    for(var oreId in oreIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + oreIds[oreId] +'/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
-    }
-    Promise.all(allPromises).then(function (responseItems){
-        for(var item in responseItems){
-            var newItem = new itemModel({
-                _id : responseItems[item].id,
-                name: responseItems[item].name,
-                description: responseItems[item].description,
-                itemType: 1,
-                volume: responseItems[item].volume,
-                imgUrlLrg: 'https://imageserver.eveonline.com/Type/'+responseItems[item].id+'_64.png',
-                imgUrlSml: 'https://imageserver.eveonline.com/Type/'+responseItems[item].id+'_32.png'
-            });
-            newItem.save();
-            items.push(newItem);
-        }
-        res.json(items);
-    }).catch(function(err){
-        console.log(err);
-    });
+    var itemType = 1;
+    getItemData(oreIds, itemType).then(function (retrievedItems){
+        res.json(retrievedItems);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    })
 };
 
 exports.updateIceData = function updateIceData(req, res) {
+    var itemType = 2;
+    getItemData(iceIds, itemType).then(function (retrievedItems){
+        res.json(retrievedItems);
+    }).catch(function (err){
+        console.log('An Error Occurred: ', err)
+    })
+};
+
+
+function getItemData(itemIds, itemType){
     var items = [];
     var allPromises = [];
-    for(var iceId in iceIds) {
-        var options = {
-            uri: eveItemCrestEndpoint + iceIds[iceId] +'/',
-            json: true
-        };
-        allPromises.push(RequestPromise(options));
-    }
-    Promise.all(allPromises).then(function (responseItems){
-        for(var item in responseItems){
-            var newItem = new itemModel({
-                _id : responseItems[item].id,
-                name: responseItems[item].name,
-                description: responseItems[item].description,
-                itemType: 2,
-                volume: responseItems[item].volume,
-                imgUrlLrg: 'https://imageserver.eveonline.com/Type/'+responseItems[item].id+'_64.png',
-                imgUrlSml: 'https://imageserver.eveonline.com/Type/'+responseItems[item].id+'_32.png'
-            });
-            newItem.save();
-            items.push(newItem);
+    for (var id in itemIds) {
+        if(itemIds.hasOwnProperty(id)){
+            var options = {
+                uri: eveItemCrestEndpoint + itemIds[id] + '/',
+                json: true
+            };
+            allPromises.push(RequestPromise(options));
         }
-        res.json(items);
-    }).catch(function(err){
+    }
+    return Promise.all(allPromises).then(function (responseItems) {
+        for (var item in responseItems) {
+            if(responseItems.hasOwnProperty(item)){
+                var newItem = new itemModel({
+                    _id : responseItems[item].id,
+                    name: responseItems[item].name,
+                    description: responseItems[item].description,
+                    itemType: itemType,
+                    volume: responseItems[item].volume,
+                    imgUrlLrg: 'https://imageserver.eveonline.com/Type/'+responseItems[item].id+'_64.png',
+                    imgUrlSml: 'https://imageserver.eveonline.com/Type/'+responseItems[item].id+'_32.png'
+                });
+                newItem.save();
+                items.push(newItem);
+            }
+        }
+        return items;
+    }).catch(function (err) {
         console.log(err);
     });
-};
+}
 
