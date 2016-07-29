@@ -4,10 +4,17 @@ var Schema = mongoose.Schema;
 //Schema Definition
 var solarSystemSchema = new Schema({
     _id: Number,
-    name: String,
+    securityClass: String,
     href: String,
     securityStatus: Number,
-    systemType: Number
+    position :{
+        x: Number,
+        y: Number,
+        z: Number
+    },
+    name: String,
+    systemType: String,
+    constellationId: Number
 });
 
 //Expose (export) the model

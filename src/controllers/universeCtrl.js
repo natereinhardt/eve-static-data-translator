@@ -9,6 +9,7 @@ var eveRegionCrestEndpoint = 'https://crest-tq.eveonline.com/regions/';
 var eveConstellationCrestEndpoint = 'https://crest-tq.eveonline.com/constellations/';
 
 exports.updateUniverseData = buildUniverse;
+
 /**
  * WARNING! buildUniverse TAKES OVER AND HOUR TO RUN (last run 1 hour 7 mins).
  *
@@ -19,13 +20,14 @@ exports.updateUniverseData = buildUniverse;
  *
  *
  * **/
+
 function buildUniverse(req, res) {
     getAllRegionsHrefs().then(function (hrefs) {
         return Promise.mapSeries(hrefs, function (href) {
             return getRegion(href).then(function (regions) {
                 return Promise.mapSeries(regions.constellations, function (constellation) {
                     return getConstellationInfo(constellation).then(function (constellationInfo) {
-                        return Promise.map(constellationInfo, getSystem).delay(2000);
+                        return Promise.map(constellationInfo, getSystem).delay(2500);
                     });
                 });
             });
@@ -43,15 +45,19 @@ function getSystem(system) {
         var securityType;
         if (responseItem.securityStatus <= (-0.990000009536743)) {
             //J-Space
-            securityType = 2
+            securityType = 'J'
         } else {
             //K-Space
-            securityType = 1;
+            securityType = 'K';
         }
         systemModel.findOne({_id: system._id}, function (err, doc) {
             doc.name = responseItem.name;
             doc.securityStatus = responseItem.securityStatus;
             doc.systemType = securityType;
+            doc.securityClass = responseItem.securityClass;
+            doc.position.x = responseItem.position.x;
+            doc.position.y = responseItem.position.y;
+            doc.position.z = responseItem.position.z;
             doc.save();
             console.log("Updated System in Database: ", doc)
         });
@@ -80,6 +86,9 @@ function getConstellationInfo(constellation) {
         //find the constellation and update it with its info
         constellationModel.findOne({_id: constellation._id}, function (err, doc) {
             doc.name = responseItem.name;
+            doc.position.x = responseItem.position.x;
+            doc.position.y = responseItem.position.y;
+            doc.position.z = responseItem.position.z;
             doc.solarSystems = arrayOfSystems;
             doc.save();
         });
