@@ -1,14 +1,23 @@
 {
   "name": "eve-static-data-translator",
   "version": "0.0.1",
+  "description": "",
+  "license": "MIT",
   "dependencies": {
     "async": "^1.5.2",
-    "bluebird": "^3.3.4",
+    "bluebird": "^3.4.1",
     "body-parser": "^1.13.3",
     "express": "^4.13.3",
     "glob": "^7.0.5",
+    "gulp": "^3.8.11",
+    "gulp-nodemon": "^1.0.5",
+    "lodash": "^4.14.0",
     "method-override": "~2.0.2",
     "mongoose": "^4.1.2",
-    "request": "^2.69.0"
+    "request": "^2.74.0",
+    "request-promise": "^4.0.2"
+  },
+  "devDependencies": {
+    "gulp-env": "^0.2.0"
   }
 }

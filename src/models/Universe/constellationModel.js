@@ -5,10 +5,8 @@ var Schema = mongoose.Schema;
 var constellationSchema = new Schema({
     _id: Number,
     name: String,
-    solarSystems: [{
-        type: Schema.ObjectId,
-        ref: 'SolarSystem'
-    }]
+    href: String,
+    solarSystems: [Number]
 });
 
 //Expose (export) the model
