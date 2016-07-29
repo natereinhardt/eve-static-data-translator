@@ -16,7 +16,7 @@ function getAllRegions(req, res) {
             return getRegion(href).then(function (regions) {
                 return Promise.mapSeries(regions.constellations, function (constellation) {
                     return getConstellationInfo(constellation).then(function (constellationInfo) {
-                        return Promise.map(constellationInfo, getSystem).delay(20);
+                        return Promise.map(constellationInfo, getSystem).delay(100);
                     });
                 });
             });
@@ -25,7 +25,7 @@ function getAllRegions(req, res) {
 }
 
 function getSystem(system) {
-    console.log('System Again', system);
+    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     var options = {
         uri: system.href,
         json: true
@@ -45,7 +45,10 @@ function getSystem(system) {
             doc.securityStatus = responseItem.securityStatus;
             doc.systemType = securityType;
             doc.save();
+            console.log("Updated System in Database: ", doc)
         });
+    }).catch(function (err){
+        console.log("Updating System Encountered an Error: ", err);
     })
 }
 
@@ -73,6 +76,8 @@ function getConstellationInfo(constellation) {
             doc.save();
         });
         return arrayOfSystems;
+    }).catch(function (err){
+        console.log("Getting Constellation Info Encountered an Error: ", err);
     });
 }
 
@@ -100,6 +105,8 @@ function getRegion(href) {
         });
         newRegion.save();
         return newRegion;
+    }).catch(function (err){
+        console.log("Getting Region Encountered an Error: ", err);
     });
 }
 
@@ -116,5 +123,7 @@ function getAllRegionsHrefs() {
             }
         }
         return regionHrefs;
+    }).catch(function (err){
+        console.log("Getting Region HREFS Encountered an Error: ", err);
     });
 }
