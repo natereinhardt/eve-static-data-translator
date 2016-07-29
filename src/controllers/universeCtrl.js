@@ -10,7 +10,7 @@ var eveConstellationCrestEndpoint = 'https://crest-tq.eveonline.com/constellatio
 
 exports.updateUniverseData = buildUniverse;
 /**
- * WARNING! buildUniverse TAKES OVER AND HOUR TO RUN.
+ * WARNING! buildUniverse TAKES OVER AND HOUR TO RUN (last run 1 hour 7 mins).
  *
  * buildUniverse should build a univers of:
  * 100 Regions
