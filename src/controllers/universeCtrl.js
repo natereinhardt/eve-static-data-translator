@@ -24,10 +24,10 @@ exports.updateUniverseData = buildUniverse;
 function buildUniverse(req, res) {
     getAllRegionsHrefs().then(function (hrefs) {
         return Promise.mapSeries(hrefs, function (href) {
-            return getRegion(href).then(function (regions) {
-                return Promise.mapSeries(regions.constellations, function (constellation) {
-                    return getConstellationInfo(constellation).then(function (constellationInfo) {
-                        return Promise.map(constellationInfo, getSystem).delay(2500);
+            return getRegion(href).then(function (constellations) {
+                return Promise.mapSeries(constellations, function (constellation) {
+                    return getConstellationInfo(constellation).then(function (system) {
+                        return Promise.map(system, getSystem).delay(2500);
                     });
                 });
             });
@@ -50,17 +50,21 @@ function getSystem(system) {
             //K-Space
             securityType = 'K';
         }
-        systemModel.findOne({_id: system._id}, function (err, doc) {
-            doc.name = responseItem.name;
-            doc.securityStatus = responseItem.securityStatus;
-            doc.systemType = securityType;
-            doc.securityClass = responseItem.securityClass;
-            doc.position.x = responseItem.position.x;
-            doc.position.y = responseItem.position.y;
-            doc.position.z = responseItem.position.z;
-            doc.save();
-            console.log("Updated System in Database: ", doc)
+        var newSystem = new systemModel({
+            _id: responseItem.id,
+            securityClass: responseItem.securityClass,
+            href: responseItem.href,
+            securityStatus: responseItem.securityStatus,
+            position :{
+                x: responseItem.position.x,
+                y: responseItem.position.y,
+                z: responseItem.position.z
+            },
+            name: responseItem.name,
+            systemType: securityType,
+            constellationId: responseItem.constellation.id
         });
+        newSystem.save();
     }).catch(function (err){
         console.log("Updating System Encountered an Error: ", err);
     })
@@ -72,27 +76,27 @@ function getConstellationInfo(constellation) {
         json: true
     };
     return RequestPromise(options).then(function (responseItem) {
-        var arrayOfSystems = [];
+        var arrayOfSystemsHrefs = [];
+        var arrayOfSystemsIds = [];
         for (var system in responseItem.systems) {
             if (responseItem.systems.hasOwnProperty(system)) {
-                var newSystem = new systemModel({
-                    _id: responseItem.systems[system].id,
-                    href: responseItem.systems[system].href
-                });
-                newSystem.save();
-                arrayOfSystems.push(newSystem);
+                arrayOfSystemsHrefs.push(responseItem.systems[system].href);
+                arrayOfSystemsIds.push(responseItem.systems[system].id);
             }
         }
-        //find the constellation and update it with its info
-        constellationModel.findOne({_id: constellation._id}, function (err, doc) {
-            doc.name = responseItem.name;
-            doc.position.x = responseItem.position.x;
-            doc.position.y = responseItem.position.y;
-            doc.position.z = responseItem.position.z;
-            doc.solarSystems = arrayOfSystems;
-            doc.save();
+        var newConstellation = new constellationModel({
+            _id: constellation.id,
+            name: responseItem.name,
+            href: constellation.href,
+            solarSystemIds: arrayOfSystemsIds,
+            position :{
+                x: responseItem.position.x,
+                y: responseItem.position.y,
+                z: responseItem.position.z
+            }
         });
-        return arrayOfSystems;
+        newConstellation.save();
+        return responseItem.systems;
     }).catch(function (err){
         console.log("Getting Constellation Info Encountered an Error: ", err);
     });
@@ -104,24 +108,20 @@ function getRegion(href) {
         json: true
     };
     return RequestPromise(options).then(function (responseItem) {
-        var constellationObjects = [];
+        var constellationIds = [];
+
         for (var item in responseItem.constellations) {
-            var newConstellation = constellationModel({
-                _id: responseItem.constellations[item].id,
-                href: eveConstellationCrestEndpoint + responseItem.constellations[item].id + '/'
-            });
-            newConstellation.save();
-            constellationObjects.push(newConstellation);
+            constellationIds.push(responseItem.constellations[item].id );
         }
         var newRegion = regionModel({
             _id: responseItem.id,
             name: responseItem.name,
             description: responseItem.description,
             href: eveRegionCrestEndpoint + responseItem.id + '/',
-            constellations: constellationObjects
+            constellationIds: constellationIds
         });
         newRegion.save();
-        return newRegion;
+        return responseItem.constellations;
     }).catch(function (err){
         console.log("Getting Region Encountered an Error: ", err);
     });

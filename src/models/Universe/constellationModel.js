@@ -6,7 +6,7 @@ var constellationSchema = new Schema({
     _id: Number,
     name: String,
     href: String,
-    solarSystems: [Number],
+    solarSystemIds: [Number],
     position :{
         x: Number,
         y: Number,

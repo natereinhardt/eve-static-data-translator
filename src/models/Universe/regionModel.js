@@ -8,7 +8,7 @@ var regionSchema = new Schema({
     name: String,
     description: String,
     href: String,
-    constellations: [{type: ObjectId, ref: 'Constellation'}]//Reference
+    constellationIds: [Number]//Reference
 });
 
 //Expose (export) the model
