@@ -8,15 +8,24 @@ var systemModel = require('./../models/universe/systemModel');
 var eveRegionCrestEndpoint = 'https://crest-tq.eveonline.com/regions/';
 var eveConstellationCrestEndpoint = 'https://crest-tq.eveonline.com/constellations/';
 
-exports.updateUniverseData = getAllRegions;
-
-function getAllRegions(req, res) {
+exports.updateUniverseData = buildUniverse;
+/**
+ * WARNING! buildUniverse TAKES OVER AND HOUR TO RUN.
+ *
+ * buildUniverse should build a univers of:
+ * 100 Regions
+ * 1120 Constellations
+ * 8035 Solar Systems
+ *
+ *
+ * **/
+function buildUniverse(req, res) {
     getAllRegionsHrefs().then(function (hrefs) {
         return Promise.mapSeries(hrefs, function (href) {
             return getRegion(href).then(function (regions) {
                 return Promise.mapSeries(regions.constellations, function (constellation) {
                     return getConstellationInfo(constellation).then(function (constellationInfo) {
-                        return Promise.map(constellationInfo, getSystem).delay(100);
+                        return Promise.map(constellationInfo, getSystem).delay(2000);
                     });
                 });
             });
@@ -25,7 +34,6 @@ function getAllRegions(req, res) {
 }
 
 function getSystem(system) {
-    console.log('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
     var options = {
         uri: system.href,
         json: true
