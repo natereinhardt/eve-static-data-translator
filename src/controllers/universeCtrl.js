@@ -12,7 +12,7 @@ exports.updateUniverseData = buildUniverse;
 /**
  * WARNING! buildUniverse TAKES OVER AND HOUR TO RUN (last run 1 hour 7 mins).
  *
- * buildUniverse should build a univers of:
+ * buildUniverse should build a universe of:
  * 100 Regions
  * 1120 Constellations
  * 8035 Solar Systems
