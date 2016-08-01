@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = mongoose.SchemaTypes.ObjectId;
 
 //Schema Definition
 var regionSchema = new Schema({
@@ -7,10 +8,7 @@ var regionSchema = new Schema({
     name: String,
     description: String,
     href: String,
-    constellations: [{
-        type: Schema.ObjectId,
-        ref: 'Constellation'
-    }]//Reference
+    constellationIds: [Number]//Reference
 });
 
 //Expose (export) the model

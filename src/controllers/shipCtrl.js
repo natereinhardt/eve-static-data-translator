@@ -141,7 +141,7 @@ function getShipData(shipIds, shipType){
                     _id: responseItems[item].id,
                     name: responseItems[item].name,
                     description: responseItems[item].description,
-                    itemType: shipType,
+                    shipType: shipType,
                     imgUrlLrg: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_64.png',
                     imgUrlSml: 'https://imageserver.eveonline.com/Type/' + responseItems[item].id + '_32.png',
                     renderUrl: 'https://imageserver.eveonline.com/Render/' + responseItems[item].id + '_256.png'
